@@ -131,9 +131,7 @@ abstract class Payone_Core_Model_Handler_Payment_Abstract
             $response instanceof Payone_Api_Response_Authorization_Redirect) {
             // Create Transaction
             $this->getServiceTransactionCreate()->createByApiResponse($order, $response, $request);
-        }
-        else
-        {
+        } else {
             $this->getServiceTransactionUpdate()->updateByApiResponse($response);
         }
 
@@ -175,23 +173,17 @@ abstract class Payone_Core_Model_Handler_Payment_Abstract
     {
         if ($this->getPaymentMethod() instanceof Payone_Core_Model_Payment_Method_Creditcard) {
             $order->setData('payone_payment_method_type', $this->getPayment()->getData('cc_type'));
+        } elseif ($this->getPaymentMethod() instanceof Payone_Core_Model_Payment_Method_OnlineBankTransfer) {
+            $order->setData('payone_payment_method_type', $this->getPayment()->getData('payone_onlinebanktransfer_type'));
+        } elseif ($this->getPaymentMethod() instanceof Payone_Core_Model_Payment_Method_SafeInvoice) {
+            $order->setData('payone_payment_method_type', $this->getPayment()->getData('payone_safe_invoice_type'));
+        } elseif ($this->getPaymentMethod() instanceof Payone_Core_Model_Payment_Method_Payolution) {
+            $order->setData('payone_payment_method_type', $this->getPayment()->getData('payone_payolution_type'));
         }
-        elseif ($this->getPaymentMethod() instanceof Payone_Core_Model_Payment_Method_OnlineBankTransfer) {
-            $order->setData('payone_payment_method_type',
-                $this->getPayment()->getData('payone_onlinebanktransfer_type'));
-        }
-        elseif ($this->getPaymentMethod() instanceof Payone_Core_Model_Payment_Method_SafeInvoice) {
-            $order->setData('payone_payment_method_type',
-                $this->getPayment()->getData('payone_safe_invoice_type'));
-        }
-        elseif ($this->getPaymentMethod() instanceof Payone_Core_Model_Payment_Method_Payolution) {
-            $order->setData('payone_payment_method_type',
-                $this->getPayment()->getData('payone_payolution_type'));
-        }
-        elseif ($this->getPaymentMethod() instanceof Payone_Core_Model_Payment_Method_Ratepay) {
-            $order->setData('payone_payment_method_type',
-                $this->getPayment()->getData('payone_ratepay_type'));
-        }
+        
+        $oQuote = Mage::getSingleton('checkout/session')->getQuote();
+        $oAddress = $oQuote->getShippingAddress();
+        $order->setData('payone_payment_fee', $oAddress->getData('payone_payment_fee'));
     }
 
     /**
